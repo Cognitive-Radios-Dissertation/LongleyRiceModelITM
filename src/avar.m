@@ -31,9 +31,10 @@ function [A_total, stats] = avar(A_ref, prop, prop_params)
     freq = prop_params.freq_mhz;
     
     % Frequency factor k (empirical from ITM measurements)
-    % Higher frequencies are more sensitive to terrain variations
-    k_f = 1 + (freq - 100) / 1000;  % Ranges from ~1 at low freq to ~20 at high freq
-    k_f = max(1, min(k_f, 20));  % Clamp to reasonable range
+    % Based on ITM documentation: terrain effects increase with frequency
+    % Use logarithmic scaling to capture frequency dependence
+    k_f = 1 + log10(freq / 100);  % k=1 at 100MHz, k=2 at 1GHz, k=3.3 at 20GHz
+    k_f = max(1, k_f);  % Ensure k >= 1
     
     delta_h = prop.delta_h;
     if delta_h == 0, delta_h = 10; end % Avoid zero, minimum terrain roughness
@@ -63,10 +64,28 @@ function [A_total, stats] = avar(A_ref, prop, prop_params)
         2, 3, 4, 5;    % 7: Maritime Temperate, Over Sea (most stable)
     ];
     
-    % Determine distance range (assume single path for now)
-    % For point-to-point, use middle range as estimate
+    % Determine distance range based on actual path distance if available
+    % Distance ranges: <50km, 50-100km, 100-200km, >200km
+    if isfield(prop_params, 'dist_km')
+        d_km = prop_params.dist_km;
+    else
+        % Estimate from terrain irregularity (rough approximation)
+        d_km = 75;  % Default to middle range
+    end
+    
+    % Select appropriate sigma_T based on distance
+    if d_km < 50
+        col = 1;
+    elseif d_km < 100
+        col = 2;
+    elseif d_km < 200
+        col = 3;
+    else
+        col = 4;
+    end
+    
     if clim >= 1 && clim <= 7
-        sigma_T = sigma_T_table(clim, 2);  % Use 50-100km range as default
+        sigma_T = sigma_T_table(clim, col);
     else
         sigma_T = 5;  % Default fallback
     end

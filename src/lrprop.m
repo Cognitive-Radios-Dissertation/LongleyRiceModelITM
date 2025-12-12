@@ -38,12 +38,17 @@ function [A_ref, mode] = lrprop(d, prop, prop_params)
             theta_g = atan((h_e(1) + h_e(2)) / dist);
             
             % Fresnel reflection coefficient
+            % Ensure prop_params has required fields for ground parameters
+            if ~isfield(prop_params, 'eps_r'), prop_params.eps_r = 15; end
+            if ~isfield(prop_params, 'sigma'), prop_params.sigma = 0.005; end
+            if ~isfield(prop_params, 'pol'), prop_params.pol = 1; end
+            
             Gamma = calc_fresnel_reflection(theta_g, freq, prop_params);
             
             % Two-ray interference including ground reflection
             % Field: E = 1 + Gamma * exp(j*arg)
             % Attenuation: A = -20*log10|E|
-            E_magnitude = abs(1 + abs(Gamma) * exp(1j * (arg + angle(Gamma))));
+            E_magnitude = abs(1 + Gamma * exp(1j * arg));
             A_two_ray = -20 * log10(E_magnitude);
             
             % Clamp to ensure no unphysical gain (passive terrain)
@@ -114,14 +119,10 @@ function A_diff = calc_diffraction(d, freq, prop, lambda)
     
     % Terrain roughness weighting factor
     % w = 0 for smooth terrain (use A_r), w = 1 for rough terrain (use A_ke)
+    % Continuous smooth function across all roughness values
     delta_h = prop.delta_h;
     k_rough = delta_h / lambda;
-    
-    if k_rough < 1
-        w = k_rough^2 / (1 + k_rough^2);
-    else
-        w = 1 / (1 + 1/k_rough^2);
-    end
+    w = k_rough^2 / (1 + k_rough^2);
     
     % Blended diffraction attenuation
     % For smooth terrain, rounded-earth dominates; for rough terrain, knife-edge dominates
