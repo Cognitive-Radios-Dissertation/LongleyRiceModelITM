@@ -45,9 +45,12 @@ h_tx = 52;   % meters
 h_rx = 2.4;  % meters
 conf = 0.5;  % 50% confidence (Median)
 
-options.pol = 0; % Horizontal
+options.pol = 1; % Vertical (as per specification)
 options.conf = conf;
 options.clim = 5; % Continental Temperate
+options.N_s = 301; % Surface refractivity
+options.eps_r = 15; % Ground permittivity
+options.sigma = 0.005; % Ground conductivity (S/m)
 
 % 3. Simulation Loop
 targets = d_vec; 
