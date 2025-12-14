@@ -62,6 +62,39 @@ Default parameters (can be modified in `scripts/run_simulation.m`):
 - **Climate**: Continental Temperate (code 5)
 - **Confidence Level**: 50% (median)
 
+## Implementation Features
+
+### Production-Ready Physics
+-   **Effective Earth Radius**: K-factor calculation from surface refractivity
+-   **Horizon Extraction**: Bidirectional scan with Earth curvature correction
+-   **Terrain Irregularity**: Interdecile range of detrended elevations
+-   **Diffraction**: Blended knife-edge and smooth-earth (Vogler) with terrain roughness weighting
+-   **Troposcatter**: Physics-based forward scatter with climate corrections
+-   **Ground Reflection**: Full Fresnel coefficients (permittivity, conductivity, polarization)
+-   **Variability**: Climate-dependent time variability and frequency-dependent location variability
+
+### Outputs
+The implementation provides:
+1. **Total path loss** in dB for complete path
+2. **Path loss versus distance** at every terrain profile point
+3. **Detailed breakdown** including:
+   - Free space loss (L_bf)
+   - Reference attenuation (A_ref)
+   - Variability adjustments (Y_total)
+   - Propagation mode at each point (1=LOS, 2=Diffraction, 3=Scatter)
+   - Geometry parameters (horizons, effective heights, terrain irregularity)
+
+### Configuration
+Default parameters (configurable via options structure):
+-   Operating frequency: 970 MHz
+-   Polarization: 1 (Vertical)
+-   Transmitter height: 52 meters AGL
+-   Receiver height: 2.4 meters AGL
+-   Surface refractivity: 301 N-units
+-   Ground permittivity: 15
+-   Ground conductivity: 0.005 S/m
+-   Climate code: 5 (Continental Temperate)
+
 ## Validation
 
 The implementation includes strict input validation for:

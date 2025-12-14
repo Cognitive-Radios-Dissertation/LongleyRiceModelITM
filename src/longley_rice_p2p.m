@@ -59,6 +59,8 @@ function [loss_db, details] = longley_rice_p2p(profile_z, profile_xi, freq_mhz, 
     [A_ref, mode] = lrprop(dist_total, prop, prop_params);
     
     % --- 4. Variability ---
+    % Add distance information for climate variability lookup
+    prop_params.dist_km = dist_total / 1000;
     [A_var, var_stats] = avar(A_ref, prop, prop_params);
     
     % --- 5. Final Calculation ---
