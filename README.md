@@ -17,15 +17,14 @@ This project is organized as follows:
   - `create_mock_data.m`: Utility to generate synthetic terrain if real data is missing.
 
 - **`data/`**: Input storage.
-  - `X.04`: Sample terrain profile (Distance vs. Elevation).
+  - `X.txt` / `X.04`: Sample terrain profile (Distance vs. Elevation in meters, 10m spacing).
 
 - **`results/`**: Output storage.
   - `pathloss_plot.png`: Generated graphs from the simulation.
+  - `pathloss_results.csv`: Numerical results with distance-dependent path loss breakdown.
 
 - **`docs/`**: Documentation and development logs.
-  - `geminiExp.md`: Comprehensive implementation plan with mathematical formulations, self-critique analysis, and improvement cycles
-  - `GeminiExp.md`: Original implementation summary
-  - `KimiExp.md`: Validation and testing documentation
+  - `geminiExp.md`: Comprehensive implementation plan with self-critique and mathematical formulations.
 
 ## Usage
 
@@ -44,9 +43,24 @@ This project is organized as follows:
     run_simulation
     ```
 4.  The script will:
-    -   Load or create the `data/X.04` terrain profile.
-    -   Calculate path loss for the specified parameters (default: 970 MHz).
+    -   Load the terrain profile from `data/X.txt` or `data/X.04`.
+    -   Calculate path loss for the specified parameters (default: 970 MHz, 52m/2.4m antennas, vertical polarization).
     -   Generate and save a plot to `results/pathloss_plot.png`.
+    -   Save numerical results to `results/pathloss_results.csv`.
+    -   Display summary statistics in the console.
+
+## Configuration
+
+Default parameters (can be modified in `scripts/run_simulation.m`):
+- **Frequency**: 970 MHz
+- **Tx Antenna Height**: 52 meters above ground
+- **Rx Antenna Height**: 2.4 meters above ground
+- **Polarization**: Vertical (pol = 1)
+- **Surface Refractivity**: 301 N-units
+- **Ground Permittivity**: 15
+- **Ground Conductivity**: 0.005 S/m
+- **Climate**: Continental Temperate (code 5)
+- **Confidence Level**: 50% (median)
 
 ## Implementation Features
 
@@ -85,8 +99,19 @@ Default parameters (configurable via options structure):
 
 The implementation includes strict input validation for:
 -   Frequency (20 - 20,000 MHz)
--   Ground Constants (Permittivity and Conductivity)
+-   Ground Constants (Permittivity 1-100, Conductivity 0.00001-10 S/m)
 -   Terrain Profile Length (Min 10 points)
+-   Antenna Heights (0.5 - 3000 meters)
+
+## Documentation
+
+For detailed information about the implementation, including:
+- Mathematical formulations for all ITM subroutines
+- Self-critique analysis and improvement iterations
+- Terrain processing pipeline
+- Implementation decisions and rationale
+
+See `docs/geminiExp.md` for the comprehensive implementation plan.
 
 ## License
 [Your License Here]

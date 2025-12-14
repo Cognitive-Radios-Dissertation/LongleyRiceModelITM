@@ -6,10 +6,16 @@ addpath('../src');
 % 1. Load Data
 data_dir = '../data';
 if ~exist(data_dir, 'dir'), mkdir(data_dir); end
-filename = fullfile(data_dir, 'X.04');
+
+% Try X.txt first, then X.04 (support both filenames)
+filename = fullfile(data_dir, 'X.txt');
+if ~isfile(filename)
+    filename = fullfile(data_dir, 'X.04');
+end
 
 if ~isfile(filename)
-    disp('X.04 not found in data/. Creating mock data for testing...');
+    disp('X.txt or X.04 not found in data/. Creating mock data for testing...');
+    filename = fullfile(data_dir, 'X.04');
     d = 0:100:50000; % 50 km, 100m step
     z = 200 + 150 * sin(d/8000).^2 + 20 * randn(size(d)); % Some hills
     data = [d', z'];
@@ -45,10 +51,10 @@ h_tx = 52;   % meters
 h_rx = 2.4;  % meters
 conf = 0.5;  % 50% confidence (Median)
 
-options.pol = 1; % Vertical (as per specification)
+options.pol = 1; % Vertical (per requirements)
 options.conf = conf;
 options.clim = 5; % Continental Temperate
-options.N_s = 301; % Surface refractivity
+options.N_s = 301; % Surface refractivity (N-units)
 options.eps_r = 15; % Ground permittivity
 options.sigma = 0.005; % Ground conductivity (S/m)
 
@@ -107,4 +113,20 @@ results_dir = '../results';
 if ~exist(results_dir, 'dir'), mkdir(results_dir); end
 save_path = fullfile(results_dir, 'pathloss_plot.png');
 saveas(fig, save_path);
-disp(['Simulation Complete. Plot saved to ', save_path]);
+disp(['Plot saved to ', save_path]);
+
+% 5. Save Numerical Results to CSV
+results_table = table(targets, loss_results, fspl_results, mode_results, ...
+    'VariableNames', {'Distance_m', 'ITM_PathLoss_dB', 'FSPL_dB', 'PropagationMode'});
+
+csv_path = fullfile(results_dir, 'pathloss_results.csv');
+writetable(results_table, csv_path);
+disp(['Numerical results saved to ', csv_path]);
+
+% Display summary statistics
+disp('--- Summary ---');
+fprintf('Total Path Length: %.2f km\n', max(targets)/1000);
+fprintf('Total Path Loss (ITM): %.2f dB\n', loss_results(end));
+fprintf('Free Space Path Loss: %.2f dB\n', fspl_results(end));
+fprintf('Additional Loss (ITM - FSPL): %.2f dB\n', loss_results(end) - fspl_results(end));
+disp('Simulation Complete.');
